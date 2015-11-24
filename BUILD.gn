@@ -1,0 +1,135 @@
+# Copyright (c) 2015 yquant.com. All rights reserved.
+# Use of this source code is governed by LGPL with static linking exception
+# that can be found in the LICENSE file.
+
+jansson_sources = [
+  "src/hashtable.h",
+  "src/jansson_private.h",
+  "src/strbuffer.h",
+  "src/utf.h",
+  "src/dump.c",
+  "src/error.c",
+  "src/hashtable.c",
+  "src/hashtable_seed.c",
+  "src/load.c",
+  "src/memory.c",
+  "src/pack_unpack.c",
+  "src/strbuffer.c",
+  "src/strconv.c",
+  "src/utf.c",
+  "src/value.c",
+]
+
+if (is_win) {
+  jansson_sources += [
+    "win/jansson_config.h",
+    "win/jansson_private_config.h",
+  ]
+} else {
+  if (is_android) {
+    jansson_sources += [
+      "android/jansson_config.h",
+      "android/jansson_private_config.h",
+    ]
+  } else {
+    jansson_sources += [
+      "linux/jansson_config.h",
+      "linux/jansson_private_config.h",
+    ]
+  }
+}
+  
+config("jansson_public_config") {
+  include_dirs = [ "src" ]
+  if (is_win) {
+    include_dirs += [ "win" ]
+  } else {
+    if (is_android) {
+      include_dirs += [ "android" ]
+    } else {
+      include_dirs += [ "linux" ]
+    }
+  }
+}
+
+config("disable_warnings_config") {
+  if (is_win) {
+    cflags = [
+      "/wd4005",
+      "/wd4334",
+      "/wd4701",
+      "/wd4706",
+      "/wd4996",
+    ]
+  }
+}
+
+config("jansson_config") {
+  defines = [ "HAVE_CONFIG_H=1" ]
+
+  if (is_win) {
+    cflags = [
+      "/D_CRT_SECURE_NO_WARNINGS",
+      "/nologo",
+    ]
+  } else {
+    cflags = [
+      "-std=c99",
+      "-pedantic",
+      "-Wall",
+    ]
+  }
+}
+
+static_library("jansson_static") {
+  sources = jansson_sources
+  
+  configs += [
+    ":jansson_config",
+    ":disable_warnings_config",
+  ]
+
+  public_configs = [
+    ":jansson_public_config",
+  ]
+}
+
+shared_library("jansson_shared") {
+  sources = jansson_sources
+  
+  sources += [
+    "src/jansson.def",
+  ]
+  
+  output_name = "jansson"
+
+  if (!is_win) {
+    cflags = [ "-fPIC" ]
+  }
+  
+  configs += [
+    ":jansson_config",
+    ":disable_warnings_config",
+  ]
+
+  public_configs = [
+    ":jansson_public_config",
+  ]
+}
+
+executable("jansson-example") {
+  sources = [
+    "examples/simple_parse.c",
+  ]
+
+  if (is_win) {
+    cflags = [
+      "/wd4267",
+      "/wd4706",
+    ]
+  }
+  
+  deps = [
+    ":jansson_shared"
+  ]
+}

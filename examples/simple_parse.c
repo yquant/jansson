@@ -92,7 +92,7 @@ void print_json_object(json_t *element, int indent) {
     print_json_indent(indent);
     size = json_object_size(element);
 
-    printf("JSON Object of %ld pair%s:\n", size, json_plural(size));
+    printf("JSON Object of %ld pair%s:\n", (long int)size, json_plural(size));
     json_object_foreach(element, key, value) {
         print_json_indent(indent + 2);
         printf("JSON Key: \"%s\"\n", key);
@@ -106,7 +106,7 @@ void print_json_array(json_t *element, int indent) {
     size_t size = json_array_size(element);
     print_json_indent(indent);
 
-    printf("JSON Array of %ld element%s:\n", size, json_plural(size));
+    printf("JSON Array of %ld element%s:\n", (long int)size, json_plural(size));
     for (i = 0; i < size; i++) {
         print_json_aux(json_array_get(element, i), indent + 2);
     }
