@@ -105,6 +105,10 @@ shared_library("jansson_shared") {
 
   if (!is_win) {
     cflags = [ "-fPIC" ]
+    
+    configs -= [
+      "//build/config/gcc:symbol_visibility_hidden",
+    ]
   }
   
   configs += [
